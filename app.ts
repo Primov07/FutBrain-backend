@@ -97,7 +97,7 @@ app.get("/logout", (req: express.Request, res: express.Response) => {
 	res.clearCookie("token", {
 		httpOnly: true,
 		secure: true,
-		sameSite: "strict",
+		sameSite: "none",
 	});
 
 	res.status(200).json({ message: "Успешно излязохте от профила си!" });
