@@ -10,7 +10,6 @@ import { replyRouter } from "./routes/reply-routes";
 import path from "path";
 import fs from "fs";
 import cors from "cors";
-import { playerUpload } from "./middlewares/multerConfig";
 import { errorHandler } from "./middlewares/error-handler";
 import { authenticateToken } from "./middlewares/auth-middleware";
 import cookieParser from "cookie-parser";
@@ -23,7 +22,8 @@ connect(connectionString);
 export const app: express.Application = express();
 
 const PORT: number = parseInt(process.env.PORT!);
-const BASE_URL: string = `http://localhost:${PORT}`;
+const HOST: string = process.env.NODE_ENV === "production" ? "0.0.0.0" : "localhost";
+const BASE_URL: string = `http://${HOST}}:${PORT}`;
 export const clubsUrl: string = `${BASE_URL}/clubs`;
 export const playersUrl: string = `${BASE_URL}/players`;
 export const accessoriesUrl: string = `${BASE_URL}/accessories`;
