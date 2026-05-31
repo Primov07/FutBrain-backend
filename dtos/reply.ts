@@ -4,7 +4,11 @@ export interface ReplyDTO {
 	id: string;
 	content: string;
 	photos: string[];
-	user: string;
+	user: {
+		id: string;
+		username: string;
+		pictureURL: string;
+	};
 	comment: string;
 	publishDate: Date;
 	likedBy: string[];

@@ -35,6 +35,9 @@ export class Post {
 	@prop({ default: Date.now })
 	public publishDate!: Date;
 
+	@prop({ default: null })
+	public photo?: string;
+
 	@prop({
 		default: [],
 		ref: "User",

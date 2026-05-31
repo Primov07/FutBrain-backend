@@ -13,30 +13,30 @@ export class Report {
 	})
     public content!: string;
     
-    @prop({ required: true })
+	@prop({ 
+		ref: "User",
+		type: String,
+		required: true
+	})
     public from!: Ref<User, string>;
-
-    @prop({ required: true })
-    public to!: Ref<User, string>;
 
 	@prop({ required: true })
 	public sentDate!: Date;
 
 	@prop({
-		default: [],
+		required: true,
 		enum: ["Post", "Reply", "Comment"],
 	})
 	public targetType!: string;
 
 	@prop({
 		required: true,
-		refPath: "targetType",
 	})
-	public targetId!: Ref<any>;
+	public targetId!: string;
 
 	@prop({
 		enum: ["Pending", "Resolved", "Rejected"],
-		default: "pending",
+		default: "Pending",
 	})
 	public status!: string;
 }

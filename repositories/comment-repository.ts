@@ -52,6 +52,10 @@ export class CommentRepository {
 		return true;
 	}
 
+	public async deleteByPostId(postId: string): Promise<void> {
+		await CommentModel.deleteMany({ post: new Types.ObjectId(postId) }).exec();
+	}
+
 	public async update(comment: Comment): Promise<void | null> {
 		const id: string = comment.id;
 		let found = await CommentModel.findById(new Types.ObjectId(id));
@@ -60,6 +64,7 @@ export class CommentRepository {
 
 		found.content = comment.content;
 		found.replies = comment.replies;
+		found.likedBy = comment.likedBy!;
 		if (comment.photos) found.photos = comment.photos;
 
 		found.save();

@@ -5,7 +5,9 @@ export {
 	PostService,
 	ReplyService,
 	UserService,
-	VoteService,
+    VoteService,
+    ReportService,
+    ModerationService
 } from "../services";
 
 export { accessoryController } from "./accessory-controller";
@@ -14,6 +16,7 @@ export { playerController } from "./player-controller";
 export { postController } from "./post-controller";
 export { replyController } from "./reply-controller";
 export { userController } from "./user-controller";
+export { reportController } from "./report-controller";
 
 export type {
 	PlayerDTO,
@@ -25,5 +28,3 @@ export type {
 } from "../dtos";
 
 export { AppError } from "../middlewares/error-handler";
-
-export { Accessory, Comment, Player, Post, Reply, User } from "../models";

@@ -82,12 +82,14 @@ export class CommentService {
 			content: comment.content,
 			photos: comment.photos,
 			user: {
+				id: comment.user?._id?.toString() || comment.user?.toString() || "",
 				username: comment.user?.username || "Анонимен",
 				pictureURL: comment.user?.pictureURL || ""
 			},
 			post: comment.post?.toString() || "",
 			publishDate: comment.publishDate,
-			likedBy: comment.likedBy?.map(String) || [],
-		} as any;
+			likedBy: comment.likedBy?.map((id: any) => id.toString()) || [],
+			replies: comment.replies?.map((id: any) => id.toString()) || [],
+		};
 	}
 }

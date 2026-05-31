@@ -29,7 +29,7 @@ export class Accessory {
 	@prop({
 		validate: {
 			validator: (v) => {
-				return v > 0;
+				return Number.isInteger(v) && v > 0;
 			},
 			message: "Price should be positive integer!",
 		},

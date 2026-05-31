@@ -1,29 +1,29 @@
-import { Types } from "mongoose";
-import { ReportModel, Report } from ".";
-import { DocumentType } from "@typegoose/typegoose";
+import { ReportModel, Report } from "../models";
 
 export class ReportRepository {
 	public async getAll(): Promise<Array<Report> | null> {
-		const reports: Array<Report> | null = await ReportModel.find()
-			.lean()
-			.exec();
-		return reports;
-    }
-    
-    public async create(report: Report): Promise<string> {
-            const model: DocumentType<Report> = new ReportModel(report);
-            await model.save();
-        return model._id.toString();
-    }
+		return await ReportModel.find().populate("from", "username").lean().exec();
+	}
 
-   public async update(report: Report): Promise<void | null> {
-        const id: string = report.id.toString();
-        let found = await ReportModel.findById(new Types.ObjectId(id));
-   
-        if (!found) return null;
-   
-        found.status = report.status;
-   
-        await found.save();
-    }
+	public async getById(id: string): Promise<Report | null> {
+		return await ReportModel.findById(id).populate("from", "username").lean().exec();
+	}
+
+	public async create(report: Partial<Report>): Promise<Report> {
+		const model = new ReportModel(report);
+		await model.save();
+		return model.toObject();
+	}
+
+	public async updateStatus(id: string, status: string): Promise<Report | null> {
+		const report = await ReportModel.findById(id);
+		if (!report) return null;
+		report.status = status;
+		await report.save();
+		return report.toObject();
+	}
+
+	public async countPending(): Promise<number> {
+		return await ReportModel.countDocuments({ status: "Pending" }).exec();
+	}
 }

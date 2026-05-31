@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { CommentService } from "../services/comment-service";
 import { LikeService } from "../services/like-service";
+import { ModerationService } from "../services/moderation-service";
 import { CommentDTO, CreateCommentDTO, UpdateCommentDTO } from "../dtos";
 import { AppError } from "../middlewares/error-handler";
 
@@ -8,6 +9,7 @@ class CommentController {
 	constructor(
 		private readonly commentService: CommentService,
 		private readonly likeService: LikeService,
+		private readonly moderationService: ModerationService,
 	) {}
 
 	public async getByPostId(req: Request, res: Response, next: NextFunction) {
@@ -46,6 +48,12 @@ class CommentController {
 	public async create(req: Request, res: Response, next: NextFunction) {
 		try {
 			const commentDTO: CreateCommentDTO = req.body;
+
+			const isSafe = await this.moderationService.isContentSafe(commentDTO.content);
+			if (!isSafe) {
+				throw new AppError("Коментарът беше отхвърлен от AI модератора поради неподходящо съдържание.", 400);
+			}
+
 			await this.commentService.create(commentDTO);
 			res.status(201).json({ message: "Коментарът е създаден успешно!" });
 		} catch (err) {
@@ -67,6 +75,13 @@ class CommentController {
 	public async update(req: Request, res: Response, next: NextFunction) {
 		try {
 			const commentDTO: UpdateCommentDTO = req.body;
+
+			// AI Модерация
+			const isSafe = await this.moderationService.isContentSafe(commentDTO.content);
+			if (!isSafe) {
+				throw new AppError("Промените в коментара бяха отхвърлени поради неподходящо съдържание.", 400);
+			}
+
 			const updated = await this.commentService.update(commentDTO);
 			if (updated === null) throw new AppError("Коментарът не е намерен", 404);
 			res.status(200).json({ message: "Коментарът е актуализиран успешно!" });
@@ -77,7 +92,7 @@ class CommentController {
 
 	public async like(req: Request, res: Response, next: NextFunction) {
 		try {
-			this.likeService.handleCommentLike(req.body.commentId, req.body.userId);
+			await this.likeService.handleCommentLike(req.body.commentId, req.body.userId);
 			res.status(201).json({ message: "Харесването на коментара беше успешно!" });
 		} catch (err) {
 			next(err);
@@ -88,4 +103,5 @@ class CommentController {
 export const commentController: CommentController = new CommentController(
 	new CommentService(),
 	new LikeService(),
+	new ModerationService(),
 );

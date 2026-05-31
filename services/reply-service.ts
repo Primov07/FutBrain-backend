@@ -25,6 +25,13 @@ export class ReplyService {
 		return replies ? replies.map((r) => this.toReplyDTO(r)) : [];
 	}
 
+	public async getCountOnComment(commentID: string) : Promise<number>
+	{
+		const replies = await this.replyRepository.getAll();
+		if (!replies) return 0;
+		return replies.length;
+	}
+
 	public async getAll(): Promise<Array<ReplyDTO> | null> {
 		const replies = await this.replyRepository.getAll();
 		if (replies) return replies.map((r) => this.toReplyDTO(r));
@@ -70,15 +77,19 @@ export class ReplyService {
 		return await this.replyRepository.update(reply);
 	}
 
-	private toReplyDTO(reply: Reply): ReplyDTO {
+	private toReplyDTO(reply: any): ReplyDTO {
 		return {
-			id: reply.id,
+			id: reply._id?.toString() || reply.id?.toString(),
 			content: reply.content,
 			photos: reply.photos,
-			user: reply.user?.toString() || "",
+			user: {
+				id: reply.user?._id?.toString() || reply.user?.id?.toString() || "",
+				username: reply.user?.username || "Анонимен",
+				pictureURL: reply.user?.pictureURL || ""
+			},
 			comment: reply.comment?.toString() || "",
 			publishDate: reply.publishDate,
-			likedBy: reply.likedBy?.map(String) || [],
+			likedBy: reply.likedBy?.map((id: any) => id.toString()) || [],
 		};
 	}
 }

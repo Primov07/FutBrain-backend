@@ -30,6 +30,22 @@ class AccessoryController {
 	}
 
 	public async create(req: Request, res: Response, next: NextFunction) {
+		const safeRename = (oldPath: string, newPath: string) => {
+			try {
+				fs.renameSync(oldPath, newPath);
+			} catch {
+				throw new AppError("Грешка при запазване на снимката", 500);
+			}
+		};
+
+		const safeCreate = async (dto: CreateAccessoryDTO) => {
+			try {
+				const id: string = await this.accessoryService.create(dto);
+				return id;
+			} catch (err) {
+				throw new AppError("Грешка при валидацията на аксесоара!", 500);
+			}
+		};
 		try {
 			const accessoryDTO: CreateAccessoryDTO = {
 				name: req.body.name,
@@ -37,17 +53,13 @@ class AccessoryController {
 				endDate: req.body.endDate,
 				type: req.body.type,
 			};
-			const id: string = await this.accessoryService.create(accessoryDTO);
+			const newPath: string = `uploads/accessories/${await safeCreate(accessoryDTO)}.webp`;
 			if (!req.file) throw new AppError("Аксесоарът трябва да има снимка", 400);
 			const oldPath: string = `uploads/accessories/${req.file?.filename!}`;
-			const newPath: string = `uploads/accessories/${id}.webp`;
-			try {
-				fs.renameSync(oldPath, newPath);
-			} catch (err) {
-				throw new AppError("Грешка при запазване на снимката", 500);
-			}
+			safeRename(oldPath, newPath);
 			res.status(201).json({ message: "Аксесоарът е създаден успешно!" });
 		} catch (err) {
+			if (req.file) fs.unlinkSync(req.file.path);
 			next(err);
 		}
 	}
@@ -78,7 +90,60 @@ class AccessoryController {
 		}
 	}
 
+	public async buy(req: Request, res: Response, next: NextFunction) {
+		try {
+			const accessoryId: string = req.body.accessoryId;
+			const userId: string = req.body.userId;
+			await this.accessoryService.buy(accessoryId, userId);
+			res.status(200).json({ message: "Аксесоарът е закупен успешно!" });
+		}
+		catch (err)
+		{
+			next(err);
+		}
+	}
+
+	public async getByUser(req: Request, res: Response, next: NextFunction) {
+		try {
+			const userId: string = req.params.userId!.toString();
+			const accessories: Array<string> | null = await this.accessoryService.getByUser(userId);
+			if (!accessories) throw new AppError("Потребителят няма закупени аксесоари или не е намерен!", 404);
+			res.json(accessories);
+		}
+		catch (err)
+		{
+			next(err);
+		}
+	}
+
 	public async update(req: Request, res: Response, next: NextFunction) {
+		const safeRename = (oldPath: string, newPath: string) => {
+			try {
+				fs.renameSync(oldPath, newPath);
+			} catch {
+				throw new AppError("Грешка при запазване на снимката", 500);
+			}
+		};
+
+		const safeUpdate = async (dto: UpdateAccessoryDTO) => {
+			try {
+				return await this.accessoryService.update(dto);
+			} catch (err) {
+				throw new AppError("Грешка при валидацията на аксесоара!", 500);
+			}
+		};
+
+		const safeDelete = (path: string) => {
+			try {
+				fs.unlinkSync(path);
+			} catch (err) {
+				throw new AppError("Грешка при изтриването на старата снимка!", 500);
+			}
+		};
+
+		let path: string = "",
+			oldPath: string = "";
+
 		try {
 			const accessory: UpdateAccessoryDTO = {
 				id: req.body.id,
@@ -87,29 +152,25 @@ class AccessoryController {
 				endDate: req.body.endDate,
 				type: req.body.type,
 			};
-			const updated: void | null =
-				await this.accessoryService.update(accessory);
+			const updated: void | null = await safeUpdate(accessory);
 			if (updated === null) throw new AppError("Аксесоарът не е намерен", 404);
 			if (req.file) {
-				const path: string = `uploads/accessories/${accessory.id}.webp`;
-				try {
-					fs.unlinkSync(path);
-				} catch (err) {
-					throw new AppError((err as any).message, 500);
-				}
-
-				const oldPath: string = `uploads/accessories/${req.file?.filename!}`;
-				fs.rename(oldPath, path, (err) => {
-					if (err)
-						throw new AppError(
-							"Грешка при обработката на снимката на аксесоара!",
-							500,
-						);
-				});
+				path = `uploads/accessories/${accessory.id}.webp`;
+				oldPath = `uploads/accessories/${req.file?.filename!}`;
+				safeRename(oldPath, path);
 			}
 			res.status(201).json({ message: "Аксесоарът е актуализиран успешно! " });
 		} catch (error) {
-			next(error);
+			if (req.file) fs.unlinkSync(req.file.path);
+			return next(error);
+		}
+
+		try {
+			safeDelete(path);
+			safeRename(oldPath, path);
+		} catch (err) {
+			const appError: AppError = new AppError((err as any).message, 500);
+			next(appError);
 		}
 	}
 }

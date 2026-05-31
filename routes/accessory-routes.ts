@@ -9,6 +9,7 @@ import {
 export const accessoryRouter: express.Router = express.Router();
 
 accessoryRouter.get("/", accessoryController.getAll.bind(accessoryController));
+accessoryRouter.get("/user/:userId", accessoryController.getByUser.bind(accessoryController));
 accessoryRouter.get(
 	"/:id",
 	accessoryController.getById.bind(accessoryController),
@@ -20,6 +21,7 @@ accessoryRouter.post(
 	accessoryUpload.single("accessoryImg"),
 	accessoryController.create.bind(accessoryController),
 );
+accessoryRouter.post("/buy", authenticateToken, accessoryController.buy.bind(accessoryController));
 accessoryRouter.delete(
 	"/:id",
 	authenticateToken,

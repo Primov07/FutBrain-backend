@@ -1,2 +1,2 @@
 export { authenticateToken, restrictToAdmin } from "./auth-middleware";
-export { playerUpload, accessoryUpload, postUpload } from "./multerConfig";
+export { playerUpload, accessoryUpload, postUpload } from "./multer-config";

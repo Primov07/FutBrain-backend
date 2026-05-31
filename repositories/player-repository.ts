@@ -43,7 +43,12 @@ export class PlayerRepository {
 
 		found.name = player.name;
 		found.club = player.club;
-		
+		found.users = player.users;
+
 		found.save();
+	}
+
+	public async resetAllVotes(): Promise<void> {
+		PlayerModel.updateMany({}, { users: [] }).exec();
 	}
 }

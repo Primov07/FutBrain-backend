@@ -3,11 +3,13 @@ import { ReplyService } from "../services/reply-service";
 import { ReplyDTO, CreateReplyDTO, UpdateReplyDTO } from "../dtos";
 import { AppError } from "../middlewares/error-handler";
 import { LikeService } from "../services/like-service";
+import { ModerationService } from "../services/moderation-service";
 
 class ReplyController {
 	constructor(
 		private readonly replyService: ReplyService,
 		private readonly likeService: LikeService,
+		private readonly moderationService: ModerationService,
 	) {}
 
 	public async getByCommentId(req: Request, res: Response, next: NextFunction) {
@@ -17,6 +19,17 @@ class ReplyController {
 			const replies = await this.replyService.getRepliesByComment(commentId, page);
 			res.json(replies);
 		} catch (error) {
+			next(error);
+		}
+	}
+
+	public async getCountOnComment(req: Request, res: Response, next: NextFunction) {
+		try {
+			const commentId = req.params.commentId?.toString()!;
+			const count = await this.replyService.getCountOnComment(commentId);
+			res.json({count});
+		}
+		catch (error) {
 			next(error);
 		}
 	}
@@ -45,6 +58,12 @@ class ReplyController {
 	public async create(req: Request, res: Response, next: NextFunction) {
 		try {
 			const replyDTO: CreateReplyDTO = req.body;
+
+			const isSafe = await this.moderationService.isContentSafe(replyDTO.content);
+			if (!isSafe) {
+				throw new AppError("Вашият отговор беше отхвърлен от AI модератора поради неподходящо съдържание.", 400);
+			}
+
 			await this.replyService.create(replyDTO);
 			res.status(201).json({ message: "Отговорът е създаден успешно!" });
 		} catch (err) {
@@ -66,6 +85,13 @@ class ReplyController {
 	public async update(req: Request, res: Response, next: NextFunction) {
 		try {
 			const replyDTO: UpdateReplyDTO = req.body;
+
+			// AI Модерация
+			const isSafe = await this.moderationService.isContentSafe(replyDTO.content);
+			if (!isSafe) {
+				throw new AppError("Промените в отговора бяха отхвърлени от AI модератора.", 400);
+			}
+
 			const updated = await this.replyService.update(replyDTO);
 			if (updated === null) throw new AppError("Отговорът не е намерен", 404);
 			res.status(200).json({ message: "Отговорът е актуализиран успешно!" });
@@ -76,7 +102,7 @@ class ReplyController {
 
 	public async like(req: Request, res: Response, next: NextFunction) {
 		try {
-			this.likeService.handleReplyLike(req.body.replyId, req.body.userId);
+			await this.likeService.handleReplyLike(req.body.replyId, req.body.userId);
 			res
 				.status(201)
 				.json({ message: "Харесването на отговора беше успешно!" });
@@ -89,4 +115,5 @@ class ReplyController {
 export const replyController: ReplyController = new ReplyController(
 	new ReplyService(),
 	new LikeService(),
+	new ModerationService(),
 );

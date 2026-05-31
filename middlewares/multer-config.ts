@@ -23,16 +23,33 @@ const postStorage: multer.StorageEngine = multer.diskStorage({
 	},
 });
 
+const userStorage: multer.StorageEngine = multer.diskStorage({
+	destination: (req, file, cb) => {
+		cb(null, "../src/uploads/users");
+	},
+	filename: (req, file, cb) => {
+		const extName = path.extname(file.originalname);
+		cb(null, Date.now() + extName);
+	},
+});
+
 
 export const playerUpload: multer.Multer = multer({
 	storage: playerStorage,
+	limits: {
+		fileSize: 1 * 1024 * 1024,
+	},
+});
+
+export const postUpload: multer.Multer = multer({
+	storage: postStorage,
 	limits: {
 		fileSize: 1 * 1024 * 1024, // 1 MB
 	},
 });
 
-export const postUpload: multer.Multer = multer({
-	storage: playerStorage,
+export const userUpload: multer.Multer = multer({
+	storage: userStorage,
 	limits: {
 		fileSize: 1 * 1024 * 1024, // 1 MB
 	},

@@ -55,9 +55,11 @@ export class PostRepository {
 
 		if (!found) return null;
 
-		found.title = post.title;
-		found.content = post.content;
-		found.comments = post.comments;
+		if (post.title) found.title = post.title;
+		if (post.content) found.content = post.content;
+		if (post.comments && post.comments.length > 0) found.comments = post.comments;
+		if (post.likedBy && post.likedBy.length > 0) found.likedBy = post.likedBy;
+		if (post.photo) found.photo = post.photo;
 		
 		found.save();
 	}
