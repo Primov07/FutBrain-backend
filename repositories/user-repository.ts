@@ -90,6 +90,7 @@ export class UserRepository {
 		found.likedPosts = user.likedPosts!;
 		found.likedComments = user.likedComments!;
 		found.likedReplies = user.likedReplies!;
+		found.pictureURL = user.pictureURL!;
 		await found.save();
 	}
 
