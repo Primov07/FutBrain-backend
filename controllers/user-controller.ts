@@ -64,6 +64,10 @@ class UserController {
 			const newPath: string = `uploads/users/${id}.webp`;
 			try {
 				fs.renameSync(oldPath, newPath);
+				this.userService.updatePicture({
+					id: id,
+					pictureURL: `users/${id}.webp`,
+				});
 				res.json({ message: "Профилната снимка е качена успешно!" });
 			} catch (err) {
 				console.error("DEBUG ERROR:", err);

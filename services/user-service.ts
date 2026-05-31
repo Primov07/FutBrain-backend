@@ -44,9 +44,19 @@ export class UserService {
 		newUser.username = user.username!;
 		newUser.passwordHash = user.password!;
 		newUser.email = user.email!;
-		newUser.pictureURL = user.pictureURL!;
 
 		const result: void | null = await this.userRepository.update(newUser);
+		return result;
+	}
+
+	public async updatePicture(pictureUpdate: { id: string; pictureURL: string }): Promise<void | null> {
+		const found = await this.userRepository.getById(pictureUpdate.id);
+		if (!found) return null;
+
+		const userToUpdate: User = found;
+		userToUpdate.pictureURL = pictureUpdate.pictureURL;
+
+		const result: void | null = await this.userRepository.update(userToUpdate);
 		return result;
 	}
 
