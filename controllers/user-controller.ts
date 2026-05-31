@@ -100,7 +100,7 @@ class UserController {
 				.cookie("token", token, {
 					httpOnly: true,
 					secure: true,
-					sameSite: "strict",
+					sameSite: "none",
 				})
 				.status(200)
 				.json({
@@ -147,7 +147,7 @@ class UserController {
 					.cookie("token", newToken, {
 						httpOnly: true,
 						secure: true,
-						sameSite: "strict",
+						sameSite: "none",
 					})
 					.status(200)
 					.json({
