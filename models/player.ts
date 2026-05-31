@@ -5,11 +5,11 @@ import { playersUrl, clubsUrl, BASE_URL } from "../app";
 @pre<Player>("save", async function () {
 	if (this.isModified("club")) {
 		if (this.club || this.club == "")
-			this.clubImg = `${clubsUrl}/${this.club}.png`;
-		else this.clubImg = `${BASE_URL}/club.png`;
+			this.clubImg = `clubs/${this.club}.png`;
+		else this.clubImg = `clubs/club.png`;
 	}
 	this.id = this._id.toString();
-	this.playerImg = `${playersUrl}/${this.id}.webp`;
+	this.playerImg = `players/${this.id}.webp`;
 })
 export class Player {
 	@prop()

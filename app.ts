@@ -80,7 +80,7 @@ app.get("/clubs", (req: express.Request, res: express.Response) => {
 			)
 			.map((file) => ({
 				name: path.parse(file).name,
-				url: `${clubsUrl}/${file}`,
+				url: `clubs/${file}`,
 			}));
 		res.json(clubImages);
 	});

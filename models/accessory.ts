@@ -9,7 +9,7 @@ enum Type {
 
 @pre<Accessory>("save", async function () {
 	this.id = this._id.toString();
-	this.photo = `${accessoriesUrl}/${this.id}.webp`
+	this.photo = `accessories/${this.id}.webp`
 })
 	
 
