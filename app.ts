@@ -127,7 +127,7 @@ app.post("/contact", async (req: express.Request, res: express.Response) => {
 			from: email,
 			to: process.env.EMAIL_USER,
 			subject: subject,
-			text: `Име: ${name}\n\n${message}`,
+			text: `Име: ${name}\nEmail: ${email}\n${message}`,
 		};
 
 		await transporter.sendMail(mailOptions);
