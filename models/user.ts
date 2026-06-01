@@ -23,7 +23,7 @@ import { AppError } from "../middlewares/error-handler";
 	}
 	if (this.isModified("strikes") && this.strikes == 3) this.isBanned = true;
 	if (this.isNew && !this.pictureURL) {
-		this.pictureURL = `users/user.png`;
+		this.pictureURL = `user.png`;
 	}
 })
 export class User {
